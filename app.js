@@ -1,65 +1,71 @@
 const express = require("express");
+const bcrypt = require("bcrypt");
+const validator = require("validator");
 const connectDB = require("./src/config/dataBase");
 const User = require("./src/models/user");
+const { validateSignUpData } = require("./src/utills/validations");
+const jwt = require("jsonwebtoken");
+const cookieParser = require("cookie-parser");
+const { userAuth } = require("./src/middlewares/auth");
 const app = express();
 
 app.use(express.json());
-
+app.use(cookieParser());
 app.post("/signup", async (req, res) => {
-  //creating user instance
-  const user = new User(req?.body);
+  const { firstName, lastName, emailId, password } = req.body;
   try {
+    //validate user data first
+    validateSignUpData(req);
+    // hash the password
+    const passwordHash = await bcrypt.hash(password, 10);
+    //creating user instance
+    const user = new User({
+      firstName,
+      lastName,
+      emailId,
+      password: passwordHash,
+    });
     await user.save();
     res.send("User added successfully!");
   } catch (error) {
-    res.status(400).send("Error to save user");
+    res.status(400).send("Error : " + error.message);
   }
 });
-app.get("/user", async (req, res) => {
-  //creating user instance
-  const { emailId } = req?.body;
+app.post("/login", async (req, res) => {
+  const { emailId, password } = req.body;
   try {
-    const userData = await User.findOne({ emailId });
-    if (userData.length === 0) {
-      res.status(404).send("User not found");
+    //validate user data first
+    if (!validator.isEmail(emailId)) {
+      throw new Error("Invalid credentials");
+    }
+    //compare the password
+    const user = await User.findOne({ emailId: emailId });
+    if (!user) {
+      throw new Error("Invalid credentials");
+    }
+    const isPassworValid = user.validatePassword(password);
+    if (isPassworValid) {
+      //generate JWT token
+      const token = await user.getJWT();
+      console.log(token);
+      //add token in cookie and send back to user
+      res.cookie("token", token, {
+        expires: new Date(Date.now() + 900000),
+      });
+      res.send("login sucess");
     } else {
-      res.send({ data: userData, message: "User fetched successfully!" });
+      throw new Error("Invalid credentials");
     }
   } catch (error) {
-    res.status(400).send("Something went wrong");
+    res.status(400).send("Error : " + error.message);
   }
 });
-app.delete("/user", async (req, res) => {
-  //creating user instance
-  const { id } = req?.body;
+app.get("/profile", userAuth, async (req, res) => {
   try {
-    const userData = await User.findByIdAndDelete(id);
-    console.log(userData);
-    if (userData) {
-      res.status(404).send("User not found");
-    } else {
-      res.send({ data: userData, message: "User deleted successfully!" });
-    }
+    const user = req.user;
+    res.send({ data: user, message: "User fetched successfully!" });
   } catch (error) {
-    res.status(400).send("Something went wrong");
-  }
-});
-app.patch("/user", async (req, res) => {
-  //creating user instance
-  const { firstName } = req?.body;
-  // console.log(firstName, id);
-  try {
-    const userData = await User.findOneAndUpdate({ firstName }, req?.body, {
-      new: true,
-    });
-    console.log(userData);
-    if (userData) {
-      res.send({ data: userData, message: "User updated sucessfully!" });
-    } else {
-      res.status(404).send("User not found");
-    }
-  } catch (error) {
-    res.status(400).send("Something went wrong");
+    res.sendStatus(400).send("Error: " + error.message);
   }
 });
 
@@ -70,4 +76,4 @@ connectDB()
       console.log("server running on 7777");
     });
   })
-  .catch((error) => console.log(error));
+  .catch((error) => console.log("SERVER ERROR", error));
