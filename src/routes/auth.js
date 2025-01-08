@@ -5,7 +5,6 @@ const bcrypt = require("bcrypt");
 const { validateSignUpData } = require("../utills/validations");
 const jwt = require("jsonwebtoken");
 const validator = require("validator");
-const { userAuth } = require("../middlewares/auth");
 
 //SIGNUP
 authRouter.post("/signup", async (req, res) => {
@@ -63,24 +62,6 @@ authRouter.post("/logout", async (req, res) => {
     .cookie("token", null, { expires: new Date(Date.now()) })
     .send("Logout sucessfully!!");
 });
-module.exports = authRouter;
 
-//FORGETPASSWORD
-authRouter.post("/forgetpassword", async (req, res) => {
-  try {
-    const { emailId, password } = req.body;
-    if (!validator.isEmail(emailId)) {
-      throw new Error("Invalid email!");
-    }
-    const user = await User.findOne({ emailId });
-    const passwordHash = await bcrypt.hash(password, 10);
-    user.password = passwordHash;
-    await user.save();
-    res.send({
-      message: `${user.firstName} your password updated sucessfully!`,
-      data: user,
-    });
-  } catch (error) {
-    res.status(400).send("Error : " + error.message);
-  }
-});
+
+module.exports = authRouter;
