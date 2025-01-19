@@ -79,14 +79,14 @@ userSchema.methods.getJWT = async function () {
   return token;
 };
 userSchema.methods.validatePassword = async function (passwordInputByUser) {
-  const user = this;
-  const passwordHash = this.password;
-  const isPasswordValid = await bcrypt.compare(
-    passwordInputByUser,
-    passwordHash
-  );
-  return isPasswordValid;
+  try {
+    return await bcrypt.compare(passwordInputByUser, this.password);
+  } catch (error) {
+    console.error("Error in password validation:", error);
+    throw new Error("Password validation failed");
+  }
 };
+
 const User = mongoose.model("User", userSchema);
 
 module.exports = User;
