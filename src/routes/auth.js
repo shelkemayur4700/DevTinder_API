@@ -42,19 +42,19 @@ authRouter.post("/login", async (req, res) => {
     const user = await User.findOne({ emailId: emailId });
     if (!user) {
       throw new Error("Invalid credentials");
-    }
-
-    const isPassworValid = await user.validatePassword(password); // Ensure proper await
-
-    if (isPassworValid) {
-      const token = await user.getJWT();
-      res
-        .cookie("token", token, {
-          expires: new Date(Date.now() + 900000),
-        })
-        .json({ message: "login success!!!", user });
     } else {
-      throw new Error("Invalid credentials");
+      const isPassworValid = await user.validatePassword(password); // Ensure proper await
+
+      if (isPassworValid) {
+        const token = await user.getJWT();
+        res
+          .cookie("token", token, {
+            expires: new Date(Date.now() + 900000),
+          })
+          .json({ message: "login success!!!", user });
+      } else {
+        throw new Error("Invalid credentials");
+      }
     }
   } catch (error) {
     res.status(400).send("Error : " + error.message);
