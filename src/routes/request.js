@@ -2,6 +2,7 @@ const express = require("express");
 const { userAuth } = require("../middlewares/auth");
 const ConnectionRequest = require("../models/connectionRequest");
 const User = require("../models/user");
+const sendEmail = require("../utills/sendEmail");
 const requestRouter = express.Router();
 //SEND REQUEST - INTERESTED OR IGNORED
 requestRouter.post(
@@ -41,8 +42,14 @@ requestRouter.post(
         status,
       });
       await ConnectionRequestData.save();
+      const emailRes = await sendEmail(
+        "A new friend request from" + " " + req?.user?.firstName,
+        req?.user?.firstName + " " + status + " in " + toUser?.firstName
+      );
+
       res.send({
-        message: req.user.firstName + " " + status + " in " + toUser?.firstName,
+        message:
+          req?.user?.firstName + " " + status + " in " + toUser?.firstName,
         ConnectionRequestData,
       });
     } catch (error) {
@@ -58,7 +65,7 @@ requestRouter.post(
     try {
       const loggedInUser = req.user;
       const { status, requestId } = req.params;
-      console.log(loggedInUser, status, requestId);
+
       //Allowed status
       const allowedStatus = ["accepted", "rejected"];
       if (!allowedStatus.includes(status)) {
@@ -71,7 +78,6 @@ requestRouter.post(
         toUserId: loggedInUser._id,
         status: "interested",
       });
-      console.log(requestData);
       if (!requestData) {
         throw new Error("Request not found");
       }
