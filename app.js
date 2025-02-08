@@ -7,10 +7,11 @@ const profileRouter = require("./src/routes/profile");
 const userRouter = require("./src/routes/user");
 const cors = require("cors");
 const app = express();
+require("dotenv").config();
 app.use(
   cors({
     origin: "http://localhost:5173",
-    credentials:true
+    credentials: true,
   })
 );
 app.use(express.json());
@@ -23,8 +24,7 @@ app.use("/", userRouter);
 
 connectDB()
   .then(() => {
-    console.log("DataBase is connected sucessfully!");
-    app.listen(7777, () => {
+    app.listen(process.env.PORT, () => {
       console.log("server running on 7777");
     });
   })
