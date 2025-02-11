@@ -42,7 +42,9 @@ requestRouter.post(
         status,
       });
       await ConnectionRequestData.save();
-      const emailRes = await sendEmail(
+      //email service to send email
+      await sendEmail(
+        toUser.emailId,
         "A new friend request from" + " " + req?.user?.firstName,
         req?.user?.firstName + " " + status + " in " + toUser?.firstName
       );

@@ -8,6 +8,8 @@ const userRouter = require("./src/routes/user");
 const cors = require("cors");
 const app = express();
 require("dotenv").config();
+//cornjob to trigger mails to all request users
+// require("./src/utills/cronJob");
 app.use(
   cors({
     origin: "http://localhost:5173",
