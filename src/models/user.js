@@ -67,6 +67,14 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "This is default about section of user!",
     },
+    isPremium: {
+      type: Boolean,
+      default: false,
+    },
+    membershipType: {
+      type: String,
+    },
+    stripeCustomerId: { type: String },
   },
   { timestamps: true }
 );
