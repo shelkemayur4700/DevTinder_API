@@ -7,7 +7,6 @@ cron.schedule("34 22 * * *", async () => {
   //send mail to all ppl who got request previous day
   try {
     const yesterday = subDays(new Date(), 0);
-    console.log(yesterday);
     const yesterdayStart = startOfDay(yesterday);
     const yesterdayEnd = endOfDay(yesterday);
 

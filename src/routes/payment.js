@@ -8,7 +8,7 @@ const paymentRouter = express.Router();
 
 paymentRouter.post("/payment/create", userAuth, async (req, res) => {
   try {
-    console.log("Request reached /payment/create");
+    // console.log("Request reached /payment/create");
     const user = req.user;
     const { amount, membershipType } = req.body;
     if (!amount) {
@@ -38,7 +38,7 @@ paymentRouter.post("/payment/create", userAuth, async (req, res) => {
       user.stripeCustomerId = stripeCustomerId;
       await user.save();
     }
-    console.log(user.name, "USER-NAME");
+    // console.log(user.name, "USER-NAME");
 
     const paymentIntent = await stripe.paymentIntents.create({
       amount: Number(amount * 100),

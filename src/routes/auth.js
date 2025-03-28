@@ -11,6 +11,11 @@ authRouter.post("/signup", async (req, res) => {
   try {
     //validate user data first
     validateSignUpData(req);
+    //check wheather user already exists
+    const alreadyExists = await User.findOne({ emailId: emailId });
+    if (alreadyExists) {
+      throw new Error("User already exists!");
+    }
     // hash the password
     const passwordHash = await bcrypt.hash(password, 10);
     //creating user instance
@@ -43,7 +48,7 @@ authRouter.post("/login", async (req, res) => {
     if (!user) {
       throw new Error("Invalid credentials");
     } else {
-      const isPassworValid = await user.validatePassword(password); // Ensure proper await
+      const isPassworValid = await user.validatePassword(password);
 
       if (isPassworValid) {
         const token = await user.getJWT();
@@ -60,6 +65,9 @@ authRouter.post("/login", async (req, res) => {
     res.status(400).send("Error : " + error.message);
   }
 });
+
+//GOOGLE-LOGIN
+authRouter.post("/google", async (req, res) => {});
 
 //LOGOUT
 authRouter.post("/logout", async (req, res) => {

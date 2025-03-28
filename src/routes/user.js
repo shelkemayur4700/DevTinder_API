@@ -73,4 +73,23 @@ userRouter.get("/feed", userAuth, async (req, res) => {
     res.status(400).send("Error: " + error.message);
   }
 });
+userRouter.get("/user/:userId", userAuth, async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    if (!userId) {
+      throw new error("User not found!");
+    }
+    let currentUser = await User.findOne(
+      { _id: userId },
+      "firstName lastName profileURL"
+    );
+    console.log("currentUser", currentUser);
+    if (currentUser) {
+      res.send(currentUser);
+    }
+  } catch (error) {
+    res.status(400).send("Error: " + error.message);
+  }
+});
 module.exports = userRouter;

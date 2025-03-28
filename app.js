@@ -10,18 +10,21 @@ const paymentRouter = require("./src/routes/payment");
 const webhookRouter = require("./src/routes/webhook");
 const http = require("http");
 const initializeSocket = require("./src/utills/socket");
-const  chatRouter  = require("./src/routes/chat");
-
+const chatRouter = require("./src/routes/chat");
+// const frontend_url = process.env.LOCAL_FRONTEND_URL;
+const { frontend_url } = require("./src/utills/constant");
 const app = express();
 require("dotenv").config();
 //cornjob to trigger mails to all request users
 // require("./src/utills/cronJob");
+
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: frontend_url,
     credentials: true,
   })
 );
+
 app.use((req, res, next) => {
   if (req.originalUrl === "/webhook") {
     next();

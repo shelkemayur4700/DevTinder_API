@@ -1,11 +1,13 @@
 const socket = require("socket.io");
 const crypto = require("crypto");
 const { Chat } = require("../models/chat");
+const { frontend_url } = require("../utills/constant");
+// const frontend_url = process.env.LOCAL_FRONTEND_URL;
 
 const initializeSocket = (server) => {
   const io = socket(server, {
     cors: {
-      origin: "http://localhost:5173",
+      origin: frontend_url,
     },
   });
 
@@ -21,7 +23,7 @@ const initializeSocket = (server) => {
     //handle events here
     socket.on("joinChat", async ({ userId, targetUserId }) => {
       const roomId = getSecretRommId(userId, targetUserId);
-      console.log("room", roomId);
+      // console.log("room", roomId);
       socket.join(roomId);
     });
 
@@ -29,7 +31,7 @@ const initializeSocket = (server) => {
       "sendMessage",
       async ({ firstName, lastName, userId, targetUserId, text }) => {
         const roomId = getSecretRommId(userId, targetUserId);
-        console.log(firstName + " " + "messageed" + " " + text);
+        // console.log(firstName + " " + "messaged" + " " + text);
         let chat = await Chat.findOne({
           participants: { $all: [userId, targetUserId] },
         });
@@ -46,7 +48,12 @@ const initializeSocket = (server) => {
           text: text,
         });
         await chat.save();
-        io.to(roomId).emit("messageRecived", { firstName, lastName, text });
+        io.to(roomId).emit("messageRecived", {
+          _id: userId,
+          firstName,
+          lastName,
+          text,
+        });
       }
     );
     socket.on("disconnect", () => {});

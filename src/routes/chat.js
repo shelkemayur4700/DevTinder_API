@@ -7,12 +7,12 @@ const chatRouter = express.Router();
 chatRouter.get("/chat/:targetUserId", userAuth, async (req, res) => {
   const { targetUserId } = req.params;
   const userId = req.user._id;
-  console.log("data from request", targetUserId, userId);
+  // console.log("data from request", targetUserId, userId);
   const participants = [
     new mongoose.Types.ObjectId(userId),
     new mongoose.Types.ObjectId(targetUserId),
   ];
-  console.log("participants", participants);
+  // console.log("participants", participants);
   try {
     let chat = await Chat.findOne({
       participants: { $all: participants },
@@ -20,7 +20,7 @@ chatRouter.get("/chat/:targetUserId", userAuth, async (req, res) => {
       path: "messages.senderId",
       select: "firstName lastName",
     });
-    console.log("chat user", chat);
+    // console.log("chat user", chat);
     if (!chat) {
       chat = new Chat({
         participants: [userId, targetUserId],
@@ -30,7 +30,7 @@ chatRouter.get("/chat/:targetUserId", userAuth, async (req, res) => {
     }
     res.json(chat);
   } catch (error) {
-    console.log("ChatRoute error", error);
+       res.status(400).send("Error: " + error.message);
   }
 });
 
